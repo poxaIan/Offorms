@@ -78,6 +78,12 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "com.offorms"
+    apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
+    project.ext.vectoricons = [
+    iconFontNames: [ "MaterialIcons.ttf", "FontAwesome.ttf" ] // Adicione as fontes necessárias
+]
+
+
     defaultConfig {
         applicationId "com.offorms"
         minSdkVersion rootProject.ext.minSdkVersion
