@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { View, Text, Button, StyleSheet, TouchableOpacity, Alert } from "react-native";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackScreenProps } from "@react-navigation/stack";
+import uuid from "react-native-uuid"; // 📌 Importa UUID para criar identificadores únicos
 
 const POWER_AUTOMATE_URL = "https://prod-23.brazilsouth.logic.azure.com:443/workflows/133e3141c8e3430e83e7b632b9ada0fb/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=siyI6pojGkO0qex9fh34_5XSHYVUdtAfXCQy6zO11C4";
 
@@ -21,7 +22,6 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
     pergunta3: "",
   });
 
-  // Função para armazenar a resposta do usuário
   const selecionarResposta = (pergunta: string, resposta: string) => {
     setRespostas((prev) => ({
       ...prev,
@@ -29,32 +29,28 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
     }));
   };
 
-  // Função para salvar localmente em caso de erro na conexão
   const salvarRespostaLocalmente = async (dados: any, status: string) => {
     try {
       const respostasSalvas = await AsyncStorage.getItem("respostas");
       const listaRespostas = respostasSalvas ? JSON.parse(respostasSalvas) : [];
-      
-      // Adiciona a resposta com o status (pendente ou enviado)
+
       listaRespostas.push({ ...dados, status });
-  
+
       await AsyncStorage.setItem("respostas", JSON.stringify(listaRespostas));
       console.log("✅ Resposta salva no histórico:", listaRespostas);
     } catch (error) {
       console.error("❌ Erro ao salvar resposta localmente:", error);
     }
   };
-  
 
-  // Função para enviar os dados para o Power Automate
   const enviarParaExcel = async () => {
     if (!respostas.pergunta1 || !respostas.pergunta2 || !respostas.pergunta3) {
       Alert.alert("Erro", "Responda todas as perguntas antes de enviar.");
       return;
     }
-  
+
     const dados = {
-      id: Math.floor(Math.random() * 10000), // Gera um ID temporário
+      id: uuid.v4(), // 📌 Gera um UUID único
       "Hora de início": new Date().toLocaleString(),
       "Hora de conclusão": new Date().toLocaleString(),
       email: "anonima@example.com",
@@ -63,9 +59,9 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
       "Pergunta 2": respostas.pergunta2,
       "Pergunta 3": respostas.pergunta3,
     };
-  
+
     console.log("🔄 Enviando dados para o Power Automate:", dados);
-  
+
     Alert.alert(
       "Confirmação de Envio",
       `Os seguintes dados serão enviados:\n\n` +
@@ -90,19 +86,17 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
               const response = await axios.post(POWER_AUTOMATE_URL, dados, {
                 headers: { "Content-Type": "application/json" },
               });
-  
+
               console.log("✅ Resposta do Power Automate:", response.data);
               Alert.alert("Sucesso", "Respostas enviadas para o Excel!");
-              
-              // Salva como "enviado"
+
               await salvarRespostaLocalmente(dados, "enviado");
-              
+
               navigation.goBack();
             } catch (error) {
               console.error("❌ Erro ao enviar para Power Automate:", error);
               Alert.alert("Erro", "Não foi possível salvar os dados.");
-  
-              // Salva como "pendente"
+
               await salvarRespostaLocalmente(dados, "pendente");
             }
           },
@@ -110,7 +104,6 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
       ]
     );
   };
-  
 
   return (
     <View style={styles.container}>
