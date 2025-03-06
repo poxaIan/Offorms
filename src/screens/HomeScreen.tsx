@@ -1,18 +1,26 @@
 import React from 'react';
 import { View, Text, Button, StyleSheet } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { StackScreenProps } from '@react-navigation/stack';
 
-type HomeScreenProps = {
-  navigation: any;
+// Definição dos tipos de navegação
+type RootStackParamList = {
+  Home: undefined;
+  FormScreen: undefined;
+  AnswersScreen: undefined;
 };
 
-const HomeScreen: React.FC<HomeScreenProps> = () => {
-  const navigation = useNavigation();
+type Props = StackScreenProps<RootStackParamList, 'Home'>;
 
+const HomeScreen: React.FC<Props> = ({ navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem-vindo ao Offorms</Text>
+
+      {/* Botão para preencher o formulário */}
       <Button title="Preencher Formulário" onPress={() => navigation.navigate('FormScreen')} />
+
+      {/* Botão para visualizar as respostas salvas */}
+      <Button title="Ver Respostas" onPress={() => navigation.navigate('AnswersScreen')} />
     </View>
   );
 };
