@@ -154,7 +154,7 @@ const AnswersScreen: React.FC = () => {
         <Text style={styles.noDataText}>Nenhuma resposta salva.</Text>
       ) : (
         <FlatList
-          data={respostas.sort((a, b) => (a["Hora de início"] < b["Hora de início"] ? 1 : -1))}
+          data={[...respostas].reverse()}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
             <TouchableOpacity
@@ -166,10 +166,9 @@ const AnswersScreen: React.FC = () => {
             >
               {modoEdicao && (
                 <CheckBox
-                value={selecionados.has(item.id)}
-                onValueChange={() => alternarSelecao(item.id)}
-              />
-              
+                  value={selecionados.has(item.id)}
+                  onValueChange={() => alternarSelecao(item.id)}
+                />
               )}
               <View style={{ marginLeft: 10 }}>
                 <Text>{`ID: ${item.id}`}</Text>
@@ -184,6 +183,8 @@ const AnswersScreen: React.FC = () => {
             </TouchableOpacity>
           )}
         />
+
+
       )}
 
       <Button title="Reenviar Pendentes" onPress={reenviarRespostasPendentes} />
