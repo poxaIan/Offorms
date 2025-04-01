@@ -103,7 +103,7 @@ const perguntasDeTexto = new Set([
   "numeroSerieAmp07_9", "numeroSerieAmp07_10", "numeroSerieAcu18", "numeroSeriePdm18",
   "numeroSerieAmp18_1", "numeroSerieAmp18_2", "numeroSerieAmp18_3", "numeroSerieAmp18_4",
   "numeroSerieAmp18_5", "numeroSerieRadioPrimario", "numeroSerieRadioSecundario",
-  "numeroSerieConversorPrimario", "numeroSerieConversorSecundario"
+  "numeroSerieConversorPrimario", "numeroSerieConversorSecundario", "versaoPavian"
 ]);
 
 const FormScreen: React.FC<Props> = ({ navigation }) => {
@@ -123,19 +123,23 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
       Alert.alert("Erro", "Selecione uma versão antes de preencher aleatoriamente.");
       return;
     }
-  
+
     const respostasAleatorias: Record<string, string> = {};
-  
-    // Perguntas 1 a 15 - Sempre preenchidas aleatoriamente
-    for (let i = 0; i < 15; i++) {
+
+    // Preenche aleatoriamente as perguntas 1 a 15
+    for (let i = 0; i < 16; i++) {
       const p = perguntas[i];
       const opcoes = ["Sim", "Não", "N/A"];
       const aleatoria = opcoes[Math.floor(Math.random() * opcoes.length)];
       respostasAleatorias[p.id] = aleatoria;
     }
-  
-    // Se G3 for selecionado, preenche as perguntas 17 a 41 (Índices de 16 a 40)
+
+    // Se G3 for selecionado, preenche as perguntas 42 a 51 com N/A
     if (versaoPavian === "G3") {
+      for (let i = 41; i < 51; i++) {
+        const p = perguntas[i];
+        respostasAleatorias[p.id] = "N/A"; // Preenche com N/A para G3
+      }
       for (let i = 16; i < 41; i++) {
         const p = perguntas[i];
         const opcoes = ["Sim", "Não", "N/A"];
@@ -143,9 +147,13 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
         respostasAleatorias[p.id] = aleatoria;
       }
     }
-  
-    // Se G4 for selecionado, preenche as perguntas 42 a 51 (Índices de 41 a 50)
+
+    // Se G4 for selecionado, preenche as perguntas 17 a 41 com N/A
     if (versaoPavian === "G4") {
+      for (let i = 16; i < 41; i++) {
+        const p = perguntas[i];
+        respostasAleatorias[p.id] = "N/A"; // Preenche com N/A para G4
+      }
       for (let i = 41; i < 51; i++) {
         const p = perguntas[i];
         const opcoes = ["Sim", "Não", "N/A"];
@@ -153,24 +161,29 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
         respostasAleatorias[p.id] = aleatoria;
       }
     }
-  
-    // Perguntas 52 em diante - Sempre preenchidas aleatoriamente
+
+    // Preenche aleatoriamente as perguntas 52 em diante
     for (let i = 51; i < perguntas.length; i++) {
       const p = perguntas[i];
       const opcoes = ["Sim", "Não", "N/A"];
       const aleatoria = opcoes[Math.floor(Math.random() * opcoes.length)];
       respostasAleatorias[p.id] = aleatoria;
     }
-  
+
     setRespostas(respostasAleatorias);
   };
-  
-  
+
+
+
+
 
   const enviar = () => {
-    const todasRespondidas = perguntas.every((p) => respostas[p.id]);
-    if (!todasRespondidas) {
-      Alert.alert("Erro", "Responda todas as perguntas antes de enviar.");
+    // Verificar se todas as perguntas foram respondidas
+    const perguntasNaoRespondidas = perguntas.filter((p) => !respostas[p.id]);
+
+    if (perguntasNaoRespondidas.length > 0) {
+      const perguntasFaltando = perguntasNaoRespondidas.map((p) => p.texto).join("\n");
+      Alert.alert("Erro", `As seguintes perguntas não foram respondidas:\n${perguntasFaltando}`);
       return;
     }
 
@@ -197,6 +210,9 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
       ]
     );
   };
+
+
+
 
   // Função para alternar o estado de expansão das seções
   const toggleSection = (sectionNumber: number) => {
@@ -251,7 +267,7 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Formulário</Text>
+      <Text style={styles.title}>Check List II</Text>
 
       <View style={styles.buttonTopGroup}>
         <Button title="Enviar" onPress={enviar} />
@@ -272,7 +288,35 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
                 styles.optionButton,
                 versaoPavian === option && styles.selectedButton,
               ]}
-              onPress={() => setVersaoPavian(option)}
+              onPress={() => {
+                setVersaoPavian(option);
+
+                // Preencher com N/A conforme a versão selecionada
+                const respostasComNA: Record<string, string> = { ...respostas };
+
+                // Se G3 for selecionado, preenche as perguntas 42 a 51 com N/A (Índices 41 a 50)
+                if (option === "G3") {
+                  for (let i = 41; i < 51; i++) {
+                    const p = perguntas[i];
+                    respostasComNA[p.id] = "N/A"; // Preenche com N/A para G3
+                  }
+
+                  respostasComNA["versaoPavian"] = "G3"; // Preenche a versão com "G3"
+                }
+
+                // Se G4 for selecionado, preenche as perguntas 17 a 41 com N/A (Índices 16 a 40)
+                if (option === "G4") {
+                  for (let i = 16; i < 41; i++) {
+                    const p = perguntas[i];
+                    respostasComNA[p.id] = "N/A"; // Preenche com N/A para G4
+                  }
+
+                  respostasComNA["versaoPavian"] = "G4"; // Preenche a versão com "G4"
+
+                }
+
+                setRespostas(respostasComNA); // Atualiza as respostas com N/A
+              }}
             >
               <Text style={styles.optionText}>{option}</Text>
             </TouchableOpacity>
@@ -280,8 +324,9 @@ const FormScreen: React.FC<Props> = ({ navigation }) => {
         </View>
       </View>
 
+
       {/* Renderizar seções baseadas na versão selecionada */}
-      {renderSection(0, 15, "PROTOCOLO DE REALIZAÇÃO DE CHECK LIST DO SISTEMA DE SINALIZAÇÃO SONORO E VISUAL", 1)}
+      {renderSection(0, 16, "PROTOCOLO DE REALIZAÇÃO DE CHECK LIST DO SISTEMA DE SINALIZAÇÃO SONORO E VISUAL", 1)}
       {versaoPavian === "G3" && renderSection(16, 41, "Perguntas referentes à versão G3 do Pavian", 2)}
       {versaoPavian === "G4" && renderSection(41, 51, "Perguntas referentes à versão G4 do Pavian", 3)}
       {renderSection(51, perguntas.length, "Perguntas Finais", 4)}
@@ -312,7 +357,7 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginBottom: 10,
     elevation: 2,
-    shadowColor: "#000", 
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
     shadowRadius: 4,
