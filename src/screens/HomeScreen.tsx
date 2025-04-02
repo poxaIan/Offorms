@@ -2,9 +2,10 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { StackScreenProps } from '@react-navigation/stack';
 
-// Definição dos tipos de navegação
+// Atualizado para incluir FormSelectorScreen
 type RootStackParamList = {
   Home: undefined;
+  FormSelectorScreen: undefined;
   FormScreen: undefined;
   AnswersScreen: undefined;
 };
@@ -22,7 +23,7 @@ const HomeScreen: React.FC<Props> = ({ navigation }) => {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('FormScreen')}
+        onPress={() => navigation.navigate('FormSelectorScreen')} // ← Atualizado
       >
         <Text style={styles.buttonText}>Começar</Text>
       </TouchableOpacity>
@@ -35,11 +36,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#ffffff', // <- aqui estava '#f5f5f5'
+    backgroundColor: '#ffffff',
     padding: 20,
   },
   image: {
-    width: 250, // ajuste conforme o tamanho ideal
+    width: 250,
     height: 250,
     resizeMode: 'contain',
     marginBottom: 20,
