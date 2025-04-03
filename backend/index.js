@@ -15,16 +15,15 @@ let ultimoRelatorioGerado = ''; // guarda caminho do último relatório
 
 app.post('/gerar-relatorio', async (req, res) => {
   console.log('📡 Requisição recebida no backend!');
-  const { textos } = req.body;
-  console.log('📝 Textos recebidos:', textos);
+  console.log('🔧 Usando valor fixo: { teste: "Ian" }');
 
   try {
     const templatePath = path.join(__dirname, 'templates', 'teste.docx');
     const template = fs.readFileSync(templatePath);
 
-    // 👇 Mapeia "nome" vindo do app para a chave {{teste}} do Word
+    // 👇 Valor fixo, ignora o corpo da requisição
     const data = {
-      teste: textos.nome || '',
+      teste: 'Ian',
     };
 
     const buffer = await createReport({ template, data });
