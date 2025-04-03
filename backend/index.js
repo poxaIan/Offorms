@@ -46,6 +46,8 @@ app.post('/gerar-relatorio', async (req, res) => {
 
     const buffer = await createReport({ template, data });
     console.log('✅ Documento gerado com sucesso, salvando em /tmp...');
+    fs.writeFileSync('/tmp/debug_b64.txt', buffer.toString('base64'));
+    console.log('📄 Base64 salvo em /tmp/debug_b64.txt');
 
     const outputPath = path.join('/tmp', 'relatorio_preenchido.docx');
     fs.writeFileSync(outputPath, buffer);
@@ -59,6 +61,16 @@ app.post('/gerar-relatorio', async (req, res) => {
   } catch (error) {
     console.error('Erro ao gerar o relatório:', error);
     res.status(500).json({ erro: 'Erro ao gerar o documento.' });
+  }
+});
+
+app.get('/debug-base64', (req, res) => {
+  const filePath = '/tmp/debug_b64.txt';
+
+  if (fs.existsSync(filePath)) {
+    res.download(filePath, 'debug_b64.txt');
+  } else {
+    res.status(404).send('Arquivo base64 não encontrado.');
   }
 });
 
