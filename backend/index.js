@@ -18,7 +18,7 @@ app.post('/gerar-relatorio', async (req, res) => {
   console.log('🔧 Usando valor fixo: { teste: "Ian" }');
 
   try {
-    const templatePath = path.join(__dirname, 'templates', 'teste.docx');
+    const templatePath = path.join(__dirname, 'templates', 'template_teste.docx');
     const template = fs.readFileSync(templatePath);
 
     // 👇 Valor fixo, ignora o corpo da requisição
