@@ -160,6 +160,8 @@ const PhotoReportScreen: React.FC = () => {
             })}
 
             <Button title="Gerar Documento" onPress={enviarFormulario} />
+
+            <Button title="Gerar Documento" onPress={enviarFormulario} />
         </ScrollView>
     );
 };
