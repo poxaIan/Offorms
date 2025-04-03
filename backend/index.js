@@ -11,69 +11,44 @@ const PORT = process.env.PORT || 3333;
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
+let ultimoRelatorioGerado = ''; // guarda caminho do último relatório
+
 app.post('/gerar-relatorio', async (req, res) => {
   console.log('📡 Requisição recebida no backend!');
-
-  const { textos, imagens } = req.body;
+  const { textos } = req.body;
   console.log('📝 Textos recebidos:', textos);
-  console.log('🖼️ Imagens recebidas:', Object.keys(imagens));
 
   try {
-    const { textos, imagens } = req.body; // textos: { nome, data, ... }, imagens: { "imagem 1": base64, ... }
-
-    const templatePath = path.join(__dirname, '..', 'backend', 'templates', 'teste.docx');
-
+    const templatePath = path.join(__dirname, 'templates', 'teste.docx');
     const template = fs.readFileSync(templatePath);
 
-    // Monta o objeto de substituição com textos e imagens
+    // 👇 Mapeia "nome" vindo do app para a chave {{teste}} do Word
     const data = {
-      ...textos,
-      ...Object.fromEntries(
-        Object.entries(imagens).map(([chave, base64]) => [
-          chave,
-          {
-            width: 600,
-            height: 340,
-            data: Buffer.from(base64, 'base64'),
-            extension: '.jpeg',
-          },
-        ])
-      ),
+      teste: textos.nome || '',
     };
 
-    console.log('✅ Iniciando geração do relatório...');
-    console.log('Dados recebidos:', { textos, imagens });
-
     const buffer = await createReport({ template, data });
-    console.log('✅ Documento gerado com sucesso, salvando em /tmp...');
-    fs.writeFileSync('/tmp/debug_b64.txt', buffer.toString('base64'));
-    console.log('📄 Base64 salvo em /tmp/debug_b64.txt');
 
     const outputPath = path.join('/tmp', 'relatorio_preenchido.docx');
     fs.writeFileSync(outputPath, buffer);
+    ultimoRelatorioGerado = outputPath;
 
-    console.log('📁 Tamanho do buffer:', buffer.length);
-    console.log('📤 Enviando base64 ao cliente...');
-    res.json({
-      filename: 'relatorio_preenchido.docx',
-      base64: buffer.toString('base64'),
-    });
+    console.log('✅ Relatório salvo em /tmp');
+    res.json({ mensagem: 'Relatório gerado com sucesso!' });
   } catch (error) {
-    console.error('Erro ao gerar o relatório:', error);
-    res.status(500).json({ erro: 'Erro ao gerar o documento.' });
+    console.error('❌ Erro ao gerar o relatório:', error);
+    res.status(500).json({ erro: 'Erro ao gerar o relatório.' });
   }
 });
 
-app.get('/debug-base64', (req, res) => {
-  const filePath = '/tmp/debug_b64.txt';
-
-  if (fs.existsSync(filePath)) {
-    res.download(filePath, 'debug_b64.txt');
+app.get('/download-relatorio', (req, res) => {
+  if (fs.existsSync(ultimoRelatorioGerado)) {
+    res.download(ultimoRelatorioGerado, 'relatorio_preenchido.docx');
   } else {
-    res.status(404).send('Arquivo base64 não encontrado.');
+    res.status(404).send('Relatório ainda não foi gerado.');
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
+  console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });
