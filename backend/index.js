@@ -21,7 +21,7 @@ app.post('/gerar-relatorio', async (req, res) => {
   try {
     const { textos, imagens } = req.body; // textos: { nome, data, ... }, imagens: { "imagem 1": base64, ... }
 
-    const templatePath = path.join(__dirname, '..', 'backend', 'templates', 'texte.docx');
+    const templatePath = path.join(__dirname, '..', 'backend', 'templates', 'teste.docx');
 
     const template = fs.readFileSync(templatePath);
 
