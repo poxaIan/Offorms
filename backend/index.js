@@ -36,10 +36,14 @@ app.post('/gerar-relatorio', async (req, res) => {
 
     const buffer = await createReport({ template, data });
 
-    const outputPath = path.join(__dirname, 'outputs', 'relatorio_preenchido.docx');
+    // ⬇️ Usa /tmp como diretório de saída no Render
+    const outputPath = path.join('/tmp', 'relatorio_preenchido.docx');
     fs.writeFileSync(outputPath, buffer);
 
-    res.download(outputPath, 'relatorio_preenchido.docx');
+    res.json({
+      filename: 'relatorio_preenchido.docx',
+      base64: buffer.toString('base64'),
+    });
   } catch (error) {
     console.error('Erro ao gerar o relatório:', error);
     res.status(500).json({ erro: 'Erro ao gerar o documento.' });

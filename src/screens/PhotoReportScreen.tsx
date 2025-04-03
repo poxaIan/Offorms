@@ -13,6 +13,7 @@ import {
     Platform,
 } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
+import { gerarRelatorio } from "../services/relatorioService";
 
 interface PerguntaImagem {
     id: string;
@@ -80,43 +81,32 @@ const PhotoReportScreen: React.FC = () => {
             return;
         }
 
-        console.log("Permissão OK, tentando abrir galeria..."); // 👈 debug
-
         const result = await launchImageLibrary({ mediaType: 'photo', includeBase64: true });
-        console.log("Resultado do ImagePicker:", result); // 👈 debug
+
+        if (result.assets && result.assets.length > 0 && result.assets[0].base64) {
+            setImagens({ ...imagens, [id]: result.assets[0].base64 });
+        }
     };
 
     const enviarFormulario = async () => {
         if (!versao) {
-          Alert.alert("Erro", "Selecione a versão do Pavian");
-          return;
+            Alert.alert("Erro", "Selecione a versão do Pavian");
+            return;
         }
-      
+
         try {
-          const response = await fetch("http://10.0.2.2:3333/gerar-relatorio", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              textos: respostasTexto,
-              imagens: Object.fromEntries(
+            const imagensFiltradas = Object.fromEntries(
                 Object.entries(imagens).map(([id, base64]) => {
-                  const pergunta = perguntasImagem.find((p) => p.id === id);
-                  return pergunta ? [pergunta.chaveDocx, base64] : [id, base64];
+                    const pergunta = perguntasImagem.find((p) => p.id === id);
+                    return pergunta ? [pergunta.chaveDocx, base64] : [id, base64];
                 })
-              ),
-            }),
-          });
-      
-          if (response.ok) {
-            Alert.alert("Sucesso", "Documento gerado com sucesso!");
-          } else {
-            Alert.alert("Erro", "Falha ao gerar documento.");
-          }
+            );
+
+            await gerarRelatorio(respostasTexto, imagensFiltradas);
         } catch (error) {
-          console.error("Erro ao enviar:", error);
-          Alert.alert("Erro", "Erro de conexão com o servidor.");
+            Alert.alert("Erro", "Não foi possível gerar ou abrir o relatório.");
         }
-      };
+    };
 
     return (
         <ScrollView style={{ padding: 16 }}>
