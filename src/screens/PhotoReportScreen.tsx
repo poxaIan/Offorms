@@ -14,6 +14,8 @@ import {
 } from "react-native";
 import { launchImageLibrary } from "react-native-image-picker";
 import { gerarRelatorio } from "../services/relatorioService";
+import { Linking } from "react-native";
+
 
 interface PerguntaImagem {
     id: string;
@@ -89,24 +91,34 @@ const PhotoReportScreen: React.FC = () => {
     };
 
     const enviarFormulario = async () => {
-        if (!versao) {
-            Alert.alert("Erro", "Selecione a versão do Pavian");
-            return;
-        }
-
         try {
-            const imagensFiltradas = Object.fromEntries(
-                Object.entries(imagens).map(([id, base64]) => {
-                    const pergunta = perguntasImagem.find((p) => p.id === id);
-                    return pergunta ? [pergunta.chaveDocx, base64] : [id, base64];
-                })
-            );
-
-            await gerarRelatorio(respostasTexto, imagensFiltradas);
+          const response = await fetch('https://offorms.onrender.com/gerar-relatorio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ textos: { teste: 'Funcionou!' } }),
+          });
+      
+          if (!response.ok) {
+            throw new Error('Erro ao gerar relatório');
+          }
+      
+          Alert.alert(
+            'Relatório gerado!',
+            'Clique para baixar o relatório.',
+            [
+              {
+                text: 'Baixar',
+                onPress: () =>
+                  Linking.openURL('https://offorms.onrender.com/download-relatorio'),
+              },
+            ]
+          );
         } catch (error) {
-            Alert.alert("Erro", "Não foi possível gerar ou abrir o relatório.");
+          console.error('Erro:', error);
+          Alert.alert('Erro', 'Falha ao gerar documento.');
         }
-    };
+      };
+      
 
     return (
         <ScrollView style={{ padding: 16 }}>

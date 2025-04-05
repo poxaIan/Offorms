@@ -6,7 +6,7 @@ import HomeScreen from './src/screens/HomeScreen';
 import FormScreen from './src/screens/CheckList';
 import AnswersScreen from './src/screens/AnswersScreen';
 import FormSelectorScreen from './src/screens/FormSelectorScreen';
-import PhotoReportScreen from './src/screens/PhotoReportScreen'; // 👈 novo import
+import PhotoReportScreen from './src/screens/PhotoReportScreen';
 
 type RootStackParamList = {
   Home: undefined;
